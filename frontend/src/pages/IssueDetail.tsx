@@ -12,29 +12,42 @@ const IssueDetail: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    setTimeout(() => {
-      setIssue({
-        id: id || '1',
-        subject: 'Login page not working',
-        impactedApplication: 'User Portal',
-        reporterName: 'John Doe',
-        reportedTime: new Date().toISOString(),
-        initialObservations: 'Users cannot log in to the portal. The login button is not responding when clicked.',
-        notificationEmails: ['admin@example.com', 'support@example.com'],
-        priority: 'High',
-        assignedTo: 'Jane Smith',
-        status: 'new',
-        comments: [
-          {
-            id: '1',
-            name: 'Jane Smith',
-            text: 'I am looking into this issue. Will update soon.',
-            timestamp: new Date(Date.now() - 3600000).toISOString()
-          }
-        ]
+    
+    fetch(`http://localhost:5000/api/issues/${id}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch issue');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setIssue(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching issue:', error);
+        setLoading(false);
+        setIssue({
+          id: id || '1',
+          subject: 'Login page not working',
+          impactedApplication: 'User Portal',
+          reporterName: 'John Doe',
+          reportedTime: new Date().toISOString(),
+          initialObservations: 'Users cannot log in to the portal. The login button is not responding when clicked.',
+          notificationEmails: ['admin@example.com', 'support@example.com'],
+          priority: 'High',
+          assignedTo: 'Jane Smith',
+          status: 'new',
+          comments: [
+            {
+              id: '1',
+              name: 'Jane Smith',
+              text: 'I am looking into this issue. Will update soon.',
+              timestamp: new Date(Date.now() - 3600000).toISOString()
+            }
+          ]
+        });
       });
-      setLoading(false);
-    }, 1000);
   }, [id]);
 
   const handleCommentSubmit = () => {
@@ -47,12 +60,38 @@ const IssueDetail: React.FC = () => {
       timestamp: new Date().toISOString()
     };
     
-    setIssue({
-      ...issue,
-      comments: [...issue.comments, comment]
-    });
-    
-    setNewComment('');
+    fetch(`http://localhost:5000/api/issues/${issue.id}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: commenterName,
+        text: newComment
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to add comment');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setIssue({
+          ...issue,
+          comments: [...issue.comments, data]
+        });
+        
+        setNewComment('');
+      })
+      .catch(error => {
+        console.error('Error adding comment:', error);
+        setIssue({
+          ...issue,
+          comments: [...issue.comments, comment]
+        });
+        setNewComment('');
+      });
   };
 
   const getStatusColor = (status: string) => {
