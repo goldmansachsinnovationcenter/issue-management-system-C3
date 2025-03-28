@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText } from '@mui/material';
+import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { Issue, Comment } from '../types/Issue';
 
 const IssueDetail: React.FC = () => {
@@ -9,6 +9,7 @@ const IssueDetail: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [newComment, setNewComment] = useState<string>('');
   const [commenterName, setCommenterName] = useState<string>('');
+  const [newStatus, setNewStatus] = useState<string>('');
 
   useEffect(() => {
     setLoading(true);
@@ -94,6 +95,40 @@ const IssueDetail: React.FC = () => {
       });
   };
 
+  const handleStatusChange = (newStatusValue: string) => {
+    if (!issue) return;
+    
+    fetch(`http://localhost:5000/api/issues/${issue.id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: newStatusValue
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to update status');
+        }
+        return response.json();
+      })
+      .then(data => {
+        setIssue({
+          ...issue,
+          status: data.status
+        });
+        setNewStatus('');
+      })
+      .catch(error => {
+        console.error('Error updating status:', error);
+        setIssue({
+          ...issue,
+          status: newStatusValue
+        });
+      });
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'new':
@@ -137,10 +172,35 @@ const IssueDetail: React.FC = () => {
             
             <Box sx={{ minWidth: '200px', flex: '1 1 45%' }}>
               <Typography variant="subtitle2">Status</Typography>
-              <Chip 
-                label={issue.status} 
-                color={getStatusColor(issue.status) as any} 
-              />
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Chip 
+                  label={issue.status} 
+                  color={getStatusColor(issue.status) as any} 
+                />
+                <FormControl sx={{ minWidth: 120, mt: 1 }}>
+                  <InputLabel id="status-select-label">Update Status</InputLabel>
+                  <Select
+                    labelId="status-select-label"
+                    value={newStatus}
+                    label="Update Status"
+                    onChange={(e) => setNewStatus(e.target.value)}
+                    size="small"
+                  >
+                    <MenuItem value="new">New</MenuItem>
+                    <MenuItem value="assigned">Assigned</MenuItem>
+                    <MenuItem value="closed">Closed</MenuItem>
+                    <MenuItem value="rejected">Rejected</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button 
+                  variant="outlined" 
+                  size="small"
+                  disabled={!newStatus}
+                  onClick={() => newStatus && handleStatusChange(newStatus)}
+                >
+                  Update
+                </Button>
+              </Box>
             </Box>
             
             <Box sx={{ minWidth: '200px', flex: '1 1 45%' }}>
