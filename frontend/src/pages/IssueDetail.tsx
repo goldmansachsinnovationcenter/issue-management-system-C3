@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { Issue, Comment } from '../types/Issue';
+interface Comment {
+  id: string;
+  name: string;
+  text: string;
+  timestamp: string;
+}
+
+interface Issue {
+  id: string;
+  subject: string;
+  impactedApplication: string;
+  reporterName: string;
+  reportedTime: string;
+  initialObservations: string;
+  notificationEmails: string[];
+  priority: string;
+  assignedTo: string;
+  status: 'new' | 'assigned' | 'closed' | 'rejected';
+  comments: Comment[];
+}
 
 const IssueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,7 +114,7 @@ const IssueDetail: React.FC = () => {
       });
   };
 
-  const handleStatusChange = (newStatusValue: string) => {
+  const handleStatusChange = (newStatusValue: 'new' | 'assigned' | 'closed' | 'rejected') => {
     if (!issue) return;
     
     fetch(`http://localhost:5000/api/issues/${issue.id}/status`, {
@@ -196,7 +215,7 @@ const IssueDetail: React.FC = () => {
                   variant="outlined" 
                   size="small"
                   disabled={!newStatus}
-                  onClick={() => newStatus && handleStatusChange(newStatus)}
+                  onClick={() => newStatus && handleStatusChange(newStatus as 'new' | 'assigned' | 'closed' | 'rejected')}
                 >
                   Update
                 </Button>
