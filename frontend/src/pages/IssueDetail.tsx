@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-import { Issue, Comment } from '@/types/Issue';
+import { Issue, Comment } from '../types/Issue';
 
 const IssueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

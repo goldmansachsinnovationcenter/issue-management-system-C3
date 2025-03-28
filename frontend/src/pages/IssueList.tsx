@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Issue } from '@/types/Issue';
+import { Issue } from '../types/Issue';
 
 const IssueList: React.FC = () => {
   const [issues, setIssues] = useState<Issue[]>([]);
