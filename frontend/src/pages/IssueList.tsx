@@ -9,37 +9,50 @@ const IssueList: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    setTimeout(() => {
-      setIssues([
-        {
-          id: '1',
-          subject: 'Login page not working',
-          impactedApplication: 'User Portal',
-          reporterName: 'John Doe',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Users cannot log in to the portal',
-          notificationEmails: ['admin@example.com'],
-          priority: 'High',
-          assignedTo: 'Jane Smith',
-          status: 'new',
-          comments: []
-        },
-        {
-          id: '2',
-          subject: 'Data not syncing',
-          impactedApplication: 'Mobile App',
-          reporterName: 'Alice Johnson',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Data not syncing between devices',
-          notificationEmails: ['tech@example.com'],
-          priority: 'Medium',
-          assignedTo: 'Bob Brown',
-          status: 'assigned',
-          comments: []
+    
+    fetch('http://localhost:5000/api/issues')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch issues');
         }
-      ]);
-      setLoading(false);
-    }, 1000);
+        return response.json();
+      })
+      .then(data => {
+        setIssues(data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching issues:', error);
+        setLoading(false);
+        setIssues([
+          {
+            id: '1',
+            subject: 'Login page not working',
+            impactedApplication: 'User Portal',
+            reporterName: 'John Doe',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Users cannot log in to the portal',
+            notificationEmails: ['admin@example.com'],
+            priority: 'High',
+            assignedTo: 'Jane Smith',
+            status: 'new',
+            comments: []
+          },
+          {
+            id: '2',
+            subject: 'Data not syncing',
+            impactedApplication: 'Mobile App',
+            reporterName: 'Alice Johnson',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Data not syncing between devices',
+            notificationEmails: ['tech@example.com'],
+            priority: 'Medium',
+            assignedTo: 'Bob Brown',
+            status: 'assigned',
+            comments: []
+          }
+        ]);
+      });
   }, []);
 
   const getStatusColor = (status: string) => {
