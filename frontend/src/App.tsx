@@ -1,12 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
-import Dashboard from './pages/Dashboard';
-import IssueList from './pages/IssueList';
-import IssueDetail from './pages/IssueDetail';
-import CreateIssue from './pages/CreateIssue';
-import Statistics from './pages/Statistics';
-import Layout from './components/Layout';
+import Dashboard from '@/pages/Dashboard';
+import IssueList from '@/pages/IssueList';
+import IssueDetail from '@/pages/IssueDetail';
+import CreateIssue from '@/pages/CreateIssue';
+import Statistics from '@/pages/Statistics';
+import Layout from '@/components/Layout';
 
 const theme = createTheme({
   palette: {

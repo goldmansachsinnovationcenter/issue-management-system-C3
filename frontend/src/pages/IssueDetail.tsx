@@ -1,26 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
-interface Comment {
-  id: string;
-  name: string;
-  text: string;
-  timestamp: string;
-}
-
-interface Issue {
-  id: string;
-  subject: string;
-  impactedApplication: string;
-  reporterName: string;
-  reportedTime: string;
-  initialObservations: string;
-  notificationEmails: string[];
-  priority: string;
-  assignedTo: string;
-  status: 'new' | 'assigned' | 'closed' | 'rejected';
-  comments: Comment[];
-}
+import { Issue, Comment } from '@/types/Issue';
 
 const IssueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();

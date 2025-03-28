@@ -2,19 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
-interface Issue {
-  id: string;
-  subject: string;
-  impactedApplication: string;
-  reporterName: string;
-  reportedTime: string;
-  initialObservations: string;
-  notificationEmails: string[];
-  priority: string;
-  assignedTo: string;
-  status: 'new' | 'assigned' | 'closed' | 'rejected';
-  comments: any[];
-}
+import { Issue } from '@/types/Issue';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 

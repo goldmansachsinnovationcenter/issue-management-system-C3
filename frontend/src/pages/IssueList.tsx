@@ -1,19 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
-interface Issue {
-  id: string;
-  subject: string;
-  impactedApplication: string;
-  reporterName: string;
-  reportedTime: string;
-  initialObservations: string;
-  notificationEmails: string[];
-  priority: string;
-  assignedTo: string;
-  status: 'new' | 'assigned' | 'closed' | 'rejected';
-  comments: any[];
-}
+import { Issue } from '@/types/Issue';
 
 const IssueList: React.FC = () => {
   const [issues, setIssues] = useState<Issue[]>([]);
