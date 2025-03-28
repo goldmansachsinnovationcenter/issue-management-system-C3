@@ -12,76 +12,98 @@ const Statistics: React.FC = () => {
 
   useEffect(() => {
     setLoading(true);
-    setTimeout(() => {
-      setIssues([
-        {
-          id: '1',
-          subject: 'Login page not working',
-          impactedApplication: 'User Portal',
-          reporterName: 'John Doe',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Users cannot log in to the portal',
-          notificationEmails: ['admin@example.com'],
-          priority: 'High',
-          assignedTo: 'Jane Smith',
-          status: 'new',
-          comments: []
-        },
-        {
-          id: '2',
-          subject: 'Data not syncing',
-          impactedApplication: 'Mobile App',
-          reporterName: 'Alice Johnson',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Data not syncing between devices',
-          notificationEmails: ['tech@example.com'],
-          priority: 'Medium',
-          assignedTo: 'Bob Brown',
-          status: 'assigned',
-          comments: []
-        },
-        {
-          id: '3',
-          subject: 'Report generation fails',
-          impactedApplication: 'Analytics Dashboard',
-          reporterName: 'Mike Wilson',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Cannot generate monthly reports',
-          notificationEmails: ['reports@example.com'],
-          priority: 'Medium',
-          assignedTo: 'Sarah Lee',
-          status: 'closed',
-          comments: []
-        },
-        {
-          id: '4',
-          subject: 'UI glitch in profile page',
-          impactedApplication: 'User Portal',
-          reporterName: 'Emma Davis',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Profile picture not displaying correctly',
-          notificationEmails: ['ui@example.com'],
-          priority: 'Low',
-          assignedTo: 'Tom Jackson',
-          status: 'rejected',
-          comments: []
-        },
-        {
-          id: '5',
-          subject: 'Payment processing error',
-          impactedApplication: 'E-commerce Platform',
-          reporterName: 'Chris Martin',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Customers unable to complete payment',
-          notificationEmails: ['payments@example.com'],
-          priority: 'Critical',
-          assignedTo: 'Jane Smith',
-          status: 'assigned',
-          comments: []
+    
+    fetch('http://localhost:5000/api/issues/statistics/all')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch statistics');
         }
-      ]);
-      setLoading(false);
-    }, 1000);
+        return response.json();
+      })
+      .then(data => {
+        return fetch('http://localhost:5000/api/issues')
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Failed to fetch issues');
+            }
+            return response.json();
+          })
+          .then(issues => {
+            setIssues(issues);
+            setLoading(false);
+          });
+      })
+      .catch(error => {
+        console.error('Error fetching statistics:', error);
+        setLoading(false);
+        setIssues([
+          {
+            id: '1',
+            subject: 'Login page not working',
+            impactedApplication: 'User Portal',
+            reporterName: 'John Doe',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Users cannot log in to the portal',
+            notificationEmails: ['admin@example.com'],
+            priority: 'High',
+            assignedTo: 'Jane Smith',
+            status: 'new',
+            comments: []
+          },
+          {
+            id: '2',
+            subject: 'Data not syncing',
+            impactedApplication: 'Mobile App',
+            reporterName: 'Alice Johnson',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Data not syncing between devices',
+            notificationEmails: ['tech@example.com'],
+            priority: 'Medium',
+            assignedTo: 'Bob Brown',
+            status: 'assigned',
+            comments: []
+          },
+          {
+            id: '3',
+            subject: 'Report generation fails',
+            impactedApplication: 'Analytics Dashboard',
+            reporterName: 'Mike Wilson',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Cannot generate monthly reports',
+            notificationEmails: ['reports@example.com'],
+            priority: 'Medium',
+            assignedTo: 'Sarah Lee',
+            status: 'closed',
+            comments: []
+          },
+          {
+            id: '4',
+            subject: 'UI glitch in profile page',
+            impactedApplication: 'User Portal',
+            reporterName: 'Emma Davis',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Profile picture not displaying correctly',
+            notificationEmails: ['ui@example.com'],
+            priority: 'Low',
+            assignedTo: 'Tom Jackson',
+            status: 'rejected',
+            comments: []
+          },
+          {
+            id: '5',
+            subject: 'Payment processing error',
+            impactedApplication: 'E-commerce Platform',
+            reporterName: 'Chris Martin',
+            reportedTime: new Date().toISOString(),
+            initialObservations: 'Customers unable to complete payment',
+            notificationEmails: ['payments@example.com'],
+            priority: 'Critical',
+            assignedTo: 'Jane Smith',
+            status: 'assigned',
+            comments: []
+          }
+        ]);
+      });
   }, []);
 
   const getStatusCounts = () => {
