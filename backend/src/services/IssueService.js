@@ -121,20 +121,28 @@ class IssueService {
     const assigneeCounts = {};
     
     issues.forEach(issue => {
-      statusCounts[issue.status]++;
-      
-      priorityCounts[issue.priority]++;
-      
-      if (applicationCounts[issue.impactedApplication]) {
-        applicationCounts[issue.impactedApplication]++;
-      } else {
-        applicationCounts[issue.impactedApplication] = 1;
+      if (issue.status && statusCounts.hasOwnProperty(issue.status)) {
+        statusCounts[issue.status]++;
       }
       
-      if (assigneeCounts[issue.assignedTo]) {
-        assigneeCounts[issue.assignedTo]++;
-      } else {
-        assigneeCounts[issue.assignedTo] = 1;
+      if (issue.priority && priorityCounts.hasOwnProperty(issue.priority)) {
+        priorityCounts[issue.priority]++;
+      }
+      
+      if (issue.impactedApplication) {
+        if (applicationCounts[issue.impactedApplication]) {
+          applicationCounts[issue.impactedApplication]++;
+        } else {
+          applicationCounts[issue.impactedApplication] = 1;
+        }
+      }
+      
+      if (issue.assignedTo) {
+        if (assigneeCounts[issue.assignedTo]) {
+          assigneeCounts[issue.assignedTo]++;
+        } else {
+          assigneeCounts[issue.assignedTo] = 1;
+        }
       }
     });
     

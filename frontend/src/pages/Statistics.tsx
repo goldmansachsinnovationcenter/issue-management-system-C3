@@ -2,16 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
-import { Issue } from '../types/Issue';
+import { Statistics as StatisticsType } from '../types/Statistics';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
 const Statistics: React.FC = () => {
-  const [issues, setIssues] = useState<Issue[]>([]);
+  const [statistics, setStatistics] = useState<StatisticsType | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
     
     fetch('http://localhost:5000/api/issues/statistics/all')
       .then(response => {
@@ -21,163 +23,33 @@ const Statistics: React.FC = () => {
         return response.json();
       })
       .then(data => {
-        return fetch('http://localhost:5000/api/issues')
-          .then(response => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch issues');
-            }
-            return response.json();
-          })
-          .then(issues => {
-            setIssues(issues);
-            setLoading(false);
-          });
+        setStatistics(data);
+        setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching statistics:', error);
+        setError('Failed to load statistics. Please try again later.');
         setLoading(false);
-        setIssues([
-          {
-            id: '1',
-            subject: 'Login page not working',
-            impactedApplication: 'User Portal',
-            reporterName: 'John Doe',
-            reportedTime: new Date().toISOString(),
-            initialObservations: 'Users cannot log in to the portal',
-            notificationEmails: ['admin@example.com'],
-            priority: 'High',
-            assignedTo: 'Jane Smith',
-            status: 'new',
-            comments: []
-          },
-          {
-            id: '2',
-            subject: 'Data not syncing',
-            impactedApplication: 'Mobile App',
-            reporterName: 'Alice Johnson',
-            reportedTime: new Date().toISOString(),
-            initialObservations: 'Data not syncing between devices',
-            notificationEmails: ['tech@example.com'],
-            priority: 'Medium',
-            assignedTo: 'Bob Brown',
-            status: 'assigned',
-            comments: []
-          },
-          {
-            id: '3',
-            subject: 'Report generation fails',
-            impactedApplication: 'Analytics Dashboard',
-            reporterName: 'Mike Wilson',
-            reportedTime: new Date().toISOString(),
-            initialObservations: 'Cannot generate monthly reports',
-            notificationEmails: ['reports@example.com'],
-            priority: 'Medium',
-            assignedTo: 'Sarah Lee',
-            status: 'closed',
-            comments: []
-          },
-          {
-            id: '4',
-            subject: 'UI glitch in profile page',
-            impactedApplication: 'User Portal',
-            reporterName: 'Emma Davis',
-            reportedTime: new Date().toISOString(),
-            initialObservations: 'Profile picture not displaying correctly',
-            notificationEmails: ['ui@example.com'],
-            priority: 'Low',
-            assignedTo: 'Tom Jackson',
-            status: 'rejected',
-            comments: []
-          },
-          {
-            id: '5',
-            subject: 'Payment processing error',
-            impactedApplication: 'E-commerce Platform',
-            reporterName: 'Chris Martin',
-            reportedTime: new Date().toISOString(),
-            initialObservations: 'Customers unable to complete payment',
-            notificationEmails: ['payments@example.com'],
-            priority: 'Critical',
-            assignedTo: 'Jane Smith',
-            status: 'assigned',
-            comments: []
-          }
-        ]);
       });
   }, []);
-
-  const getStatusCounts = () => {
-    const statusCounts = {
-      new: 0,
-      assigned: 0,
-      closed: 0,
-      rejected: 0
-    };
-    
-    issues.forEach(issue => {
-      statusCounts[issue.status as keyof typeof statusCounts]++;
-    });
-    
-    return statusCounts;
-  };
-
-  const getPriorityCounts = () => {
-    const priorityCounts = {
-      Low: 0,
-      Medium: 0,
-      High: 0,
-      Critical: 0
-    };
-    
-    issues.forEach(issue => {
-      priorityCounts[issue.priority as keyof typeof priorityCounts]++;
-    });
-    
-    return priorityCounts;
-  };
-
-  const getApplicationCounts = () => {
-    const appCounts: Record<string, number> = {};
-    
-    issues.forEach(issue => {
-      if (appCounts[issue.impactedApplication]) {
-        appCounts[issue.impactedApplication]++;
-      } else {
-        appCounts[issue.impactedApplication] = 1;
-      }
-    });
-    
-    return appCounts;
-  };
-
-  const getAssigneeCounts = () => {
-    const assigneeCounts: Record<string, number> = {};
-    
-    issues.forEach(issue => {
-      if (assigneeCounts[issue.assignedTo]) {
-        assigneeCounts[issue.assignedTo]++;
-      } else {
-        assigneeCounts[issue.assignedTo] = 1;
-      }
-    });
-    
-    return assigneeCounts;
-  };
 
   if (loading) {
     return <Typography>Loading statistics...</Typography>;
   }
 
-  const statusCounts = getStatusCounts();
-  const priorityCounts = getPriorityCounts();
-  const applicationCounts = getApplicationCounts();
-  const assigneeCounts = getAssigneeCounts();
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
+
+  if (!statistics) {
+    return <Typography>No statistics available.</Typography>;
+  }
 
   const statusData = {
-    labels: Object.keys(statusCounts),
+    labels: Object.keys(statistics.statusCounts),
     datasets: [
       {
-        data: Object.values(statusCounts),
+        data: Object.values(statistics.statusCounts),
         backgroundColor: [
           'rgba(54, 162, 235, 0.6)',
           'rgba(255, 206, 86, 0.6)',
@@ -196,10 +68,10 @@ const Statistics: React.FC = () => {
   };
 
   const priorityData = {
-    labels: Object.keys(priorityCounts),
+    labels: Object.keys(statistics.priorityCounts),
     datasets: [
       {
-        data: Object.values(priorityCounts),
+        data: Object.values(statistics.priorityCounts),
         backgroundColor: [
           'rgba(75, 192, 192, 0.6)',
           'rgba(54, 162, 235, 0.6)',
@@ -218,11 +90,11 @@ const Statistics: React.FC = () => {
   };
 
   const applicationData = {
-    labels: Object.keys(applicationCounts),
+    labels: Object.keys(statistics.applicationCounts),
     datasets: [
       {
         label: 'Issues by Application',
-        data: Object.values(applicationCounts),
+        data: Object.values(statistics.applicationCounts),
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
@@ -231,11 +103,11 @@ const Statistics: React.FC = () => {
   };
 
   const assigneeData = {
-    labels: Object.keys(assigneeCounts),
+    labels: Object.keys(statistics.assigneeCounts),
     datasets: [
       {
         label: 'Issues by Assignee',
-        data: Object.values(assigneeCounts),
+        data: Object.values(statistics.assigneeCounts),
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1,
@@ -250,7 +122,7 @@ const Statistics: React.FC = () => {
       </Typography>
       
       <Typography variant="h6" gutterBottom>
-        Total Issues: {issues.length}
+        Total Issues: {statistics.totalIssues}
       </Typography>
       
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
