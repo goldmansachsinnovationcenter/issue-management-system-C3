@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, Paper, Chip, Divider, TextField, Fab, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, Backdrop, CircularProgress } from '@mui/material';
 import { Issue, Comment } from '../types/Issue';
+import SendIcon from '@mui/icons-material/Send';
+import UpdateIcon from '@mui/icons-material/Update';
 
 const IssueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -10,6 +12,8 @@ const IssueDetail: React.FC = () => {
   const [newComment, setNewComment] = useState<string>('');
   const [commenterName, setCommenterName] = useState<string>('');
   const [newStatus, setNewStatus] = useState<string>('');
+  const [commentSubmitting, setCommentSubmitting] = useState<boolean>(false);
+  const [statusUpdating, setStatusUpdating] = useState<boolean>(false);
 
   useEffect(() => {
     setLoading(true);
@@ -54,6 +58,8 @@ const IssueDetail: React.FC = () => {
   const handleCommentSubmit = () => {
     if (!newComment.trim() || !commenterName.trim() || !issue) return;
     
+    setCommentSubmitting(true);
+    
     const comment: Comment = {
       id: Date.now().toString(),
       name: commenterName,
@@ -84,6 +90,7 @@ const IssueDetail: React.FC = () => {
         });
         
         setNewComment('');
+        setCommentSubmitting(false);
       })
       .catch(error => {
         console.error('Error adding comment:', error);
@@ -92,11 +99,14 @@ const IssueDetail: React.FC = () => {
           comments: [...issue.comments, comment]
         });
         setNewComment('');
+        setCommentSubmitting(false);
       });
   };
 
   const handleStatusChange = (newStatusValue: 'new' | 'assigned' | 'closed' | 'rejected') => {
     if (!issue) return;
+    
+    setStatusUpdating(true);
     
     fetch(`http://localhost:5000/api/issues/${issue.id}/status`, {
       method: 'PATCH',
@@ -119,6 +129,7 @@ const IssueDetail: React.FC = () => {
           status: data.status
         });
         setNewStatus('');
+        setStatusUpdating(false);
       })
       .catch(error => {
         console.error('Error updating status:', error);
@@ -126,6 +137,7 @@ const IssueDetail: React.FC = () => {
           ...issue,
           status: newStatusValue
         });
+        setStatusUpdating(false);
       });
   };
 
@@ -192,14 +204,17 @@ const IssueDetail: React.FC = () => {
                     <MenuItem value="rejected">Rejected</MenuItem>
                   </Select>
                 </FormControl>
-                <Button 
-                  variant="outlined" 
+                <Fab 
+                  variant="extended"
                   size="small"
-                  disabled={!newStatus}
+                  color="secondary"
+                  disabled={!newStatus || statusUpdating}
                   onClick={() => newStatus && handleStatusChange(newStatus as 'new' | 'assigned' | 'closed' | 'rejected')}
+                  aria-label="update status"
                 >
-                  Update
-                </Button>
+                  <UpdateIcon sx={{ mr: 1 }} />
+                  {statusUpdating ? 'Updating...' : 'Update'}
+                </Fab>
               </Box>
             </Box>
             
@@ -308,19 +323,27 @@ const IssueDetail: React.FC = () => {
                 required
               />
             </Box>
-            <Box>
-              <Button 
-                variant="contained" 
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Fab 
+                variant="extended"
                 color="primary"
                 onClick={handleCommentSubmit}
-                disabled={!newComment.trim() || !commenterName.trim()}
+                disabled={!newComment.trim() || !commenterName.trim() || commentSubmitting}
+                aria-label="submit comment"
               >
-                Submit Comment
-              </Button>
+                <SendIcon sx={{ mr: 1 }} />
+                {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
+              </Fab>
             </Box>
           </Box>
         </Box>
       </Paper>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={commentSubmitting || statusUpdating}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   );
 };
