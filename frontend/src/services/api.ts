@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Issue, CreateIssueRequest, UpdateIssueRequest, AddCommentRequest, Statistics } from '@/types/Issue';
+import { Issue, CreateIssueRequest, UpdateIssueRequest, AddCommentRequest, Statistics } from '../types/Issue';
 
 const API_BASE_URL = '/api';
 

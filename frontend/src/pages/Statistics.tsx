@@ -19,7 +19,7 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { issueApi } from '../services/api';
-import { Statistics as StatisticsType, IssueStatus, IssuePriority } from '../types/Issue';
+import { Statistics as StatisticsType, IssueStatus } from '../types/Issue';
 
 ChartJS.register(
   CategoryScale,

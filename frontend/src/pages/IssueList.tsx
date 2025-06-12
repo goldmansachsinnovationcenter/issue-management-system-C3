@@ -12,13 +12,9 @@ import {
   Paper,
   Chip,
   Fab,
-  TextField,
   Grid,
-  FormControl,
-  InputLabel,
-  MenuItem,
 } from '@mui/material';
-import { Add, Search } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
