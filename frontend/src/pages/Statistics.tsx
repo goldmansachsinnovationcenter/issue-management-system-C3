@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography, Paper, Backdrop, CircularProgress } from '@mui/material';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import { Issue } from '../types/Issue';
@@ -165,7 +165,19 @@ const Statistics: React.FC = () => {
   };
 
   if (loading) {
-    return <Typography>Loading statistics...</Typography>;
+    return (
+      <Box>
+        <Typography variant="h4" gutterBottom>
+          Issue Statistics
+        </Typography>
+        <Backdrop
+          sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={loading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </Box>
+    );
   }
 
   const statusCounts = getStatusCounts();

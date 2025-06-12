@@ -72,10 +72,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           flexGrow: 1,
           p: 3,
           width: '100%',
-          mt: 8
+          mt: 8,
+          position: 'relative'
         }}
       >
-        <Container>
+        <Container maxWidth="lg">
           {children}
         </Container>
       </Box>

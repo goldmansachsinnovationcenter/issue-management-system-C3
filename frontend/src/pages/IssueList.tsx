@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button } from '@mui/material';
+import { Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, Button, Fab, Backdrop, CircularProgress } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { Issue } from '../types/Issue';
+import AddIcon from '@mui/icons-material/Add';
 
 const IssueList: React.FC = () => {
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -74,19 +75,26 @@ const IssueList: React.FC = () => {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">Issues</Typography>
-        <Button 
-          variant="contained" 
+        <Fab 
+          variant="extended"
           color="primary" 
           component={Link} 
           to="/create"
+          aria-label="create new issue"
         >
+          <AddIcon sx={{ mr: 1 }} />
           Create New Issue
-        </Button>
+        </Fab>
       </Box>
       
-      {loading ? (
-        <Typography>Loading issues...</Typography>
-      ) : (
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      
+      {!loading && (
         <TableContainer component={Paper}>
           <Table>
             <TableHead>

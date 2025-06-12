@@ -16,6 +16,28 @@ const theme = createTheme({
     secondary: {
       main: '#dc004e',
     },
+    background: {
+      default: '#f5f5f5',
+    },
+  },
+  components: {
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08)',
+          '&:hover': {
+            boxShadow: '0 8px 16px rgba(0,0,0,0.16), 0 4px 8px rgba(0,0,0,0.12)',
+          },
+        },
+      },
+    },
+    MuiBackdrop: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        },
+      },
+    },
   },
 });
 

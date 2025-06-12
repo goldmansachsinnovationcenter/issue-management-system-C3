@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, TextField, MenuItem, Button, Chip, InputLabel } from '@mui/material';
+import { Box, Typography, Paper, TextField, MenuItem, Fab, Backdrop, CircularProgress } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
 
 const CreateIssue: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ const CreateIssue: React.FC = () => {
     assignedTo: false
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showBackdrop, setShowBackdrop] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,6 +63,7 @@ const CreateIssue: React.FC = () => {
     }
     
     setSubmitting(true);
+    setShowBackdrop(true);
     
     const formattedData = {
       ...formData,
@@ -83,11 +86,13 @@ const CreateIssue: React.FC = () => {
       .then(data => {
         console.log('Issue created:', data);
         setSubmitting(false);
+        setShowBackdrop(false);
         navigate('/issues');
       })
       .catch(error => {
         console.error('Error creating issue:', error);
         setSubmitting(false);
+        setShowBackdrop(false);
       });
   };
 
@@ -218,20 +223,28 @@ const CreateIssue: React.FC = () => {
               </Box>
             </Box>
             
-            <Box sx={{ mt: 2 }}>
-              <Button
+            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+              <Fab
                 type="submit"
-                variant="contained"
+                variant="extended"
                 color="primary"
                 size="large"
                 disabled={submitting}
+                aria-label="create issue"
               >
+                <SaveIcon sx={{ mr: 1 }} />
                 {submitting ? 'Creating...' : 'Create Issue'}
-              </Button>
+              </Fab>
             </Box>
           </Box>
         </form>
       </Paper>
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={showBackdrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   );
 };
