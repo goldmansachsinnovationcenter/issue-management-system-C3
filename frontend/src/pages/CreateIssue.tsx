@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, TextField, MenuItem, Button, Chip, InputLabel } from '@mui/material';
+import { API_BASE_URL } from '../config';
 
 const CreateIssue: React.FC = () => {
   const navigate = useNavigate();
@@ -67,7 +68,7 @@ const CreateIssue: React.FC = () => {
       notificationEmails: formData.notificationEmails.split(',').map(email => email.trim())
     };
     
-    fetch('http://localhost:5000/api/issues', {
+    fetch(`${API_BASE_URL}/api/issues`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
