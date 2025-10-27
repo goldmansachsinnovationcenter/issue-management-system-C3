@@ -1,5 +1,12 @@
 const issueService = require('../services/IssueService');
 
+const sanitizeString = (str) => {
+  if (typeof str !== 'string') return str;
+  return str
+    .replace(/[<>]/g, '')
+    .trim();
+};
+
 class IssueController {
   getAllIssues(req, res) {
     try {
@@ -39,7 +46,58 @@ class IssueController {
         });
       }
       
-      const newIssue = issueService.createIssue(issueData);
+      if (issueData.notificationEmails && Array.isArray(issueData.notificationEmails)) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const invalidEmails = issueData.notificationEmails.filter(email => !emailRegex.test(email));
+        if (invalidEmails.length > 0) {
+          return res.status(400).json({ 
+            message: 'Invalid email format in notification emails', 
+            invalidEmails 
+          });
+        }
+      }
+      
+      const fieldLengthValidations = {
+        subject: { max: 200, min: 3 },
+        initialObservations: { max: 2000, min: 10 },
+        reporterName: { max: 100, min: 2 },
+        assignedTo: { max: 100, min: 2 },
+        impactedApplication: { max: 100, min: 2 }
+      };
+      
+      for (const [field, limits] of Object.entries(fieldLengthValidations)) {
+        if (issueData[field]) {
+          if (issueData[field].length < limits.min) {
+            return res.status(400).json({ 
+              message: `${field} must be at least ${limits.min} characters` 
+            });
+          }
+          if (issueData[field].length > limits.max) {
+            return res.status(400).json({ 
+              message: `${field} must not exceed ${limits.max} characters` 
+            });
+          }
+        }
+      }
+      
+      const validPriorities = ['Low', 'Medium', 'High', 'Critical'];
+      if (!validPriorities.includes(issueData.priority)) {
+        return res.status(400).json({ 
+          message: 'Invalid priority value. Must be one of: Low, Medium, High, Critical',
+          providedValue: issueData.priority
+        });
+      }
+      
+      const sanitizedData = {
+        ...issueData,
+        subject: sanitizeString(issueData.subject),
+        initialObservations: sanitizeString(issueData.initialObservations),
+        reporterName: sanitizeString(issueData.reporterName),
+        assignedTo: sanitizeString(issueData.assignedTo),
+        impactedApplication: sanitizeString(issueData.impactedApplication)
+      };
+      
+      const newIssue = issueService.createIssue(sanitizedData);
       res.status(201).json(newIssue);
     } catch (error) {
       res.status(500).json({ message: 'Error creating issue', error: error.message });

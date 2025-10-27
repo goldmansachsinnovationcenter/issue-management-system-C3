@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel, CircularProgress } from '@mui/material';
 import { Issue, Comment } from '../types/Issue';
+import { API_BASE_URL } from '../config';
+import { ErrorAlert } from '../components/ErrorAlert';
 
 const IssueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -10,11 +12,13 @@ const IssueDetail: React.FC = () => {
   const [newComment, setNewComment] = useState<string>('');
   const [commenterName, setCommenterName] = useState<string>('');
   const [newStatus, setNewStatus] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
+    setError(null);
     
-    fetch(`http://localhost:5000/api/issues/${id}`)
+    fetch(`${API_BASE_URL}/api/issues/${id}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch issue');
@@ -27,27 +31,8 @@ const IssueDetail: React.FC = () => {
       })
       .catch(error => {
         console.error('Error fetching issue:', error);
+        setError('Failed to load issue details. Please try again later.');
         setLoading(false);
-        setIssue({
-          id: id || '1',
-          subject: 'Login page not working',
-          impactedApplication: 'User Portal',
-          reporterName: 'John Doe',
-          reportedTime: new Date().toISOString(),
-          initialObservations: 'Users cannot log in to the portal. The login button is not responding when clicked.',
-          notificationEmails: ['admin@example.com', 'support@example.com'],
-          priority: 'High',
-          assignedTo: 'Jane Smith',
-          status: 'new',
-          comments: [
-            {
-              id: '1',
-              name: 'Jane Smith',
-              text: 'I am looking into this issue. Will update soon.',
-              timestamp: new Date(Date.now() - 3600000).toISOString()
-            }
-          ]
-        });
       });
   }, [id]);
 
@@ -61,7 +46,7 @@ const IssueDetail: React.FC = () => {
       timestamp: new Date().toISOString()
     };
     
-    fetch(`http://localhost:5000/api/issues/${issue.id}/comments`, {
+    fetch(`${API_BASE_URL}/api/issues/${issue.id}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,6 +69,7 @@ const IssueDetail: React.FC = () => {
         });
         
         setNewComment('');
+        setCommenterName('');
       })
       .catch(error => {
         console.error('Error adding comment:', error);
@@ -92,13 +78,14 @@ const IssueDetail: React.FC = () => {
           comments: [...issue.comments, comment]
         });
         setNewComment('');
+        setCommenterName('');
       });
   };
 
   const handleStatusChange = (newStatusValue: 'new' | 'assigned' | 'closed' | 'rejected') => {
     if (!issue) return;
     
-    fetch(`http://localhost:5000/api/issues/${issue.id}/status`, {
+    fetch(`${API_BASE_URL}/api/issues/${issue.id}/status`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -145,7 +132,11 @@ const IssueDetail: React.FC = () => {
   };
 
   if (loading) {
-    return <Typography>Loading issue details...</Typography>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (!issue) {
@@ -157,6 +148,8 @@ const IssueDetail: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Issue Details
       </Typography>
+      
+      <ErrorAlert error={error} onClose={() => setError(null)} />
       
       <Paper sx={{ p: 3, mb: 4 }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -172,19 +165,20 @@ const IssueDetail: React.FC = () => {
             
             <Box sx={{ minWidth: '200px', flex: '1 1 45%' }}>
               <Typography variant="subtitle2">Status</Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
                 <Chip 
                   label={issue.status} 
                   color={getStatusColor(issue.status) as any} 
                 />
-                <FormControl sx={{ minWidth: 120, mt: 1 }}>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, alignItems: { xs: 'stretch', sm: 'flex-end' } }}>
+                <FormControl sx={{ minWidth: 200, flex: 1 }} size="small">
                   <InputLabel id="status-select-label">Update Status</InputLabel>
                   <Select
                     labelId="status-select-label"
                     value={newStatus}
                     label="Update Status"
                     onChange={(e) => setNewStatus(e.target.value)}
-                    size="small"
                   >
                     <MenuItem value="new">New</MenuItem>
                     <MenuItem value="assigned">Assigned</MenuItem>
@@ -193,10 +187,11 @@ const IssueDetail: React.FC = () => {
                   </Select>
                 </FormControl>
                 <Button 
-                  variant="outlined" 
+                  variant="contained" 
                   size="small"
                   disabled={!newStatus}
                   onClick={() => newStatus && handleStatusChange(newStatus as 'new' | 'assigned' | 'closed' | 'rejected')}
+                  sx={{ minWidth: 100 }}
                 >
                   Update
                 </Button>
