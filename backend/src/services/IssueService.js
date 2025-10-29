@@ -69,7 +69,8 @@ class IssueService {
       issueData.notificationEmails,
       issueData.priority,
       issueData.assignedTo,
-      status
+      status,
+      issueData.userId
     );
 
     issues.push(newIssue);
@@ -92,7 +93,8 @@ class IssueService {
       uuidv4(),
       commentData.name,
       commentData.text,
-      new Date().toISOString()
+      new Date().toISOString(),
+      commentData.userId
     );
 
     issue.addComment(comment);
