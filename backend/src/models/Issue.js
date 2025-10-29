@@ -1,5 +1,5 @@
 class Issue {
-  constructor(id, subject, impactedApplication, reporterName, reportedTime, initialObservations, notificationEmails, priority, assignedTo, status = 'new') {
+  constructor(id, subject, impactedApplication, reporterName, reportedTime, initialObservations, notificationEmails, priority, assignedTo, status = 'new', userId = null) {
     this.id = id;
     this.subject = subject;
     this.impactedApplication = impactedApplication;
@@ -10,6 +10,7 @@ class Issue {
     this.priority = priority;
     this.assignedTo = assignedTo;
     this.status = status;
+    this.userId = userId;
     this.comments = [];
   }
 

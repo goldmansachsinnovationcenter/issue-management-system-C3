@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, TextField, MenuItem, Button, Chip, InputLabel } from '@mui/material';
+import { useAuth } from '../contexts/AuthContext';
 
 const CreateIssue: React.FC = () => {
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [formData, setFormData] = useState({
     subject: '',
     impactedApplication: '',
-    reporterName: '',
     initialObservations: '',
     notificationEmails: '',
     priority: 'Medium',
@@ -17,7 +18,6 @@ const CreateIssue: React.FC = () => {
   const [formErrors, setFormErrors] = useState({
     subject: false,
     impactedApplication: false,
-    reporterName: false,
     initialObservations: false,
     notificationEmails: false,
     assignedTo: false
@@ -43,7 +43,6 @@ const CreateIssue: React.FC = () => {
     const errors = {
       subject: !formData.subject.trim(),
       impactedApplication: !formData.impactedApplication.trim(),
-      reporterName: !formData.reporterName.trim(),
       initialObservations: !formData.initialObservations.trim(),
       notificationEmails: !formData.notificationEmails.trim(),
       assignedTo: !formData.assignedTo.trim()
@@ -71,6 +70,7 @@ const CreateIssue: React.FC = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(formattedData),
     })
@@ -113,32 +113,17 @@ const CreateIssue: React.FC = () => {
               />
             </Box>
             
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-              <Box sx={{ flex: '1 1 45%', minWidth: '200px' }}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Impacted Application"
-                  name="impactedApplication"
-                  value={formData.impactedApplication}
-                  onChange={handleChange}
-                  error={formErrors.impactedApplication}
-                  helperText={formErrors.impactedApplication ? "Application name is required" : ""}
-                />
-              </Box>
-              
-              <Box sx={{ flex: '1 1 45%', minWidth: '200px' }}>
-                <TextField
-                  required
-                  fullWidth
-                  label="Reporter Name"
-                  name="reporterName"
-                  value={formData.reporterName}
-                  onChange={handleChange}
-                  error={formErrors.reporterName}
-                  helperText={formErrors.reporterName ? "Reporter name is required" : ""}
-                />
-              </Box>
+            <Box>
+              <TextField
+                required
+                fullWidth
+                label="Impacted Application"
+                name="impactedApplication"
+                value={formData.impactedApplication}
+                onChange={handleChange}
+                error={formErrors.impactedApplication}
+                helperText={formErrors.impactedApplication ? "Application name is required" : ""}
+              />
             </Box>
             
             <Box>

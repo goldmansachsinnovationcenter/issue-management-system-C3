@@ -29,7 +29,7 @@ class IssueController {
     try {
       const issueData = req.body;
       
-      const requiredFields = ['subject', 'impactedApplication', 'reporterName', 'initialObservations', 'priority', 'assignedTo'];
+      const requiredFields = ['subject', 'impactedApplication', 'initialObservations', 'priority', 'assignedTo'];
       const missingFields = requiredFields.filter(field => !issueData[field]);
       
       if (missingFields.length > 0) {
@@ -39,7 +39,14 @@ class IssueController {
         });
       }
       
-      const newIssue = issueService.createIssue(issueData);
+      const userId = req.user ? req.user.id : null;
+      const reporterName = req.user ? req.user.username : issueData.reporterName || 'Anonymous';
+      
+      const newIssue = issueService.createIssue({
+        ...issueData,
+        reporterName,
+        userId
+      });
       res.status(201).json(newIssue);
     } catch (error) {
       res.status(500).json({ message: 'Error creating issue', error: error.message });
@@ -74,13 +81,20 @@ class IssueController {
       const issueId = req.params.id;
       const commentData = req.body;
       
-      if (!commentData.name || !commentData.text) {
+      if (!commentData.text) {
         return res.status(400).json({ 
-          message: 'Missing required fields. Name and text are required for comments.' 
+          message: 'Missing required fields. Text is required for comments.' 
         });
       }
       
-      const newComment = issueService.addComment(issueId, commentData);
+      const userId = req.user ? req.user.id : null;
+      const name = req.user ? req.user.username : commentData.name || 'Anonymous';
+      
+      const newComment = issueService.addComment(issueId, {
+        ...commentData,
+        name,
+        userId
+      });
       
       if (!newComment) {
         return res.status(404).json({ message: `Issue with id ${issueId} not found` });

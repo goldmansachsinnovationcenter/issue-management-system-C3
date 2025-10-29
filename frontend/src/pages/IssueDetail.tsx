@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Box, Typography, Paper, Chip, Divider, TextField, Button, List, ListItem, ListItemText, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { Issue, Comment } from '../types/Issue';
+import { useAuth } from '../contexts/AuthContext';
 
 const IssueDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { token } = useAuth();
   const [issue, setIssue] = useState<Issue | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [newComment, setNewComment] = useState<string>('');
-  const [commenterName, setCommenterName] = useState<string>('');
   const [newStatus, setNewStatus] = useState<string>('');
 
   useEffect(() => {
@@ -52,22 +53,15 @@ const IssueDetail: React.FC = () => {
   }, [id]);
 
   const handleCommentSubmit = () => {
-    if (!newComment.trim() || !commenterName.trim() || !issue) return;
-    
-    const comment: Comment = {
-      id: Date.now().toString(),
-      name: commenterName,
-      text: newComment,
-      timestamp: new Date().toISOString()
-    };
+    if (!newComment.trim() || !issue) return;
     
     fetch(`http://localhost:5000/api/issues/${issue.id}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
-        name: commenterName,
         text: newComment
       }),
     })
@@ -87,11 +81,7 @@ const IssueDetail: React.FC = () => {
       })
       .catch(error => {
         console.error('Error adding comment:', error);
-        setIssue({
-          ...issue,
-          comments: [...issue.comments, comment]
-        });
-        setNewComment('');
+        alert('Failed to add comment. Please try again.');
       });
   };
 
@@ -102,6 +92,7 @@ const IssueDetail: React.FC = () => {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({
         status: newStatusValue
@@ -289,16 +280,6 @@ const IssueDetail: React.FC = () => {
             <Box>
               <TextField
                 fullWidth
-                label="Your Name"
-                value={commenterName}
-                onChange={(e) => setCommenterName(e.target.value)}
-                margin="normal"
-                required
-              />
-            </Box>
-            <Box>
-              <TextField
-                fullWidth
                 label="Comment"
                 multiline
                 rows={4}
@@ -313,7 +294,7 @@ const IssueDetail: React.FC = () => {
                 variant="contained" 
                 color="primary"
                 onClick={handleCommentSubmit}
-                disabled={!newComment.trim() || !commenterName.trim()}
+                disabled={!newComment.trim()}
               >
                 Submit Comment
               </Button>
